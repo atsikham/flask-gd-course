@@ -26,7 +26,9 @@ flask db upgrade
 flask run
 ----
 
-== Debug access entrries
+== Debug access entries
+
+Change `run.py` to add more debug information
 
 [source,shell]
 ----
