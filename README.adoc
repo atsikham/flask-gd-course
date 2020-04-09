@@ -1,0 +1,35 @@
+= flask-animal-store
+
+Sample app with flask and sqlite
+
+== Install requirements
+
+[source,shell]
+----
+python3 -m venv venv && chmod +x venv/bin/activate
+source venv/bin/activate
+python3 -m pip install -r requirements.txt
+----
+
+== Initialize database
+
+[source,shell]
+----
+flask db init
+flask db migrate -m "initial"
+flask db upgrade
+----
+
+== Run application
+[source,shell]
+----
+flask run
+----
+
+== Debug access entrries
+
+[source,shell]
+----
+flask shell
+access.query.all()
+----
