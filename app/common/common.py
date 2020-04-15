@@ -33,9 +33,9 @@ def error_handler(f):
     def wrapper(*args, **kwargs):
         try:
             response = f(*args, **kwargs)
-        except StatementError as e:
+        except StatementError:
             invalid_msg = {
-                'error': 'Unsupported field type'
+                'error': 'Unsupported field or field type'
             }
             response = Response(json.dumps(invalid_msg), status=400, mimetype='application/json')
         except Exception as e:

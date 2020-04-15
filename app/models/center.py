@@ -1,5 +1,3 @@
-import json
-
 from app import db
 from sqlalchemy.orm import relationship
 
@@ -21,15 +19,8 @@ class Center(db.Model):
         self.login = login
         self.password = password
 
-    def __repr__(self):
-        center_object = {
-            'address': self.address,
-            'login': self.login
-        }
-        return json.dumps(center_object)
-
     def __str__(self):
-        return '{} - {}'.format(self.login, self.id)
+        return f'{self.login} - {self.id}'
 
     @staticmethod
     def password_match(login, password):

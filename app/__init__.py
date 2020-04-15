@@ -27,7 +27,7 @@ def create_app(environment):
         from app.routes import routes
         from app.models import animal
         from app.models import center
-        from app.models import specie
+        from app.models import species
         from app.models import api_access
     return app
 

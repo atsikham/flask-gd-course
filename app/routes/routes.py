@@ -8,7 +8,7 @@ from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identi
 from app.common.common import error_handler
 from app.models.animal import Animal
 from app.models.center import Center
-from app.models.specie import Specie
+from app.models.species import Species
 from app.models.api_access import Access
 from app import file_logger
 
@@ -40,19 +40,19 @@ def get_animals():
 @error_handler
 def add_animal():
     request_data = request.get_json()
-    specie = Specie.get_specie(request_data['specie_id'])
-    if 'description' not in list(request_data.keys()):
-        request_data['description'] = specie.description
-    if 'price' not in list(request_data.keys()):
-        request_data['price'] = specie.price
+    species = Species.get_species(request_data['species_id'])
+    if 'description' not in request_data:
+        request_data['description'] = species.description
+    if 'price' not in request_data:
+        request_data['price'] = species.price
     animal_id = Animal.add_animal(**request_data)
     request_center = get_jwt_identity()
     log_data = {'method_type': request.method, 'req_url': request.path,
-                'center_id': Center.get_center_by_name(request_center).id,
+                'center_name': request_center,
                 'entity_type': 'animal', 'entity_id': animal_id}
     file_logger.info('Animal added', extra=log_data)
     response = Response('', status=201, mimetype='application/json')
-    response.headers['Location'] = '/animals/' + str(animal_id)
+    response.headers['Location'] = f'/animals/{animal_id}'
     return response
 
 
@@ -73,11 +73,11 @@ def update_animal_info(animal_id):
     if Center.get_center(Animal.get_animal(animal_id).center_id).login != request_center:
         return Response('Forbidden', status=403)
     request_data = request.get_json()
-    specie = Specie.get_specie(request_data['specie_id'])
+    species = Species.get_species(request_data['species_id'])
     if 'description' not in list(request_data.keys()):
-        request_data['description'] = specie.description
+        request_data['description'] = species.description
     if 'price' not in list(request_data.keys()):
-        request_data['price'] = specie.price
+        request_data['price'] = species.price
     Animal.replace_animal(animal_id, **request_data)
     response = Response('', status=204, mimetype='application/json')
     return response
@@ -117,34 +117,34 @@ def add_center():
     request_data = request.get_json()
     center_id = Center.add_center(**request_data)
     response = Response('', status=201, mimetype='application/json')
-    response.headers['Location'] = '/centers/' + str(center_id)
+    response.headers['Location'] = f'/centers/{center_id}'
     return response
 
 
 @app.route('/species', methods=['GET'])
-def get_species():
+def get_all_species():
     species = [
-        '{} - {}'.format(inflect_engine.plural(specie), Specie.get_animals_count_by_name(specie))
-        for specie in Specie.get_all_species()]
+        f'{inflect_engine.plural(species)} - {Species.get_animals_count_by_name(species)}'
+        for species in Species.get_all_species()]
     return jsonify({'species': species})
 
 
 @app.route('/species', methods=['POST'])
 @jwt_required
 @error_handler
-def add_specie():
+def add_species():
     request_data = request.get_json()
-    specie_id = Specie.add_specie(**request_data)
+    species_id = Species.add_species(**request_data)
     request_center = get_jwt_identity()
     log_data = {'method_type': request.method, 'req_url': request.path,
                 'center_id': Center.get_center_by_name(request_center).id,
-                'entity_type': 'specie', 'entity_id': specie_id}
-    file_logger.info('Specie added', extra=log_data)
+                'entity_type': 'species', 'entity_id': species_id}
+    file_logger.info('Species added', extra=log_data)
     response = Response('', status=201, mimetype='application/json')
-    response.headers['Location'] = '/species/' + str(specie_id)
+    response.headers['Location'] = f'/species/{species_id}'
     return response
 
 
-@app.route('/species/<int:specie_id>', methods=['GET'])
-def get_specie(specie_id):
-    return jsonify(Specie.get_specie(specie_id=specie_id))
+@app.route('/species/<int:species_id>', methods=['GET'])
+def get_species(species_id):
+    return jsonify(Species.get_species(species_id=species_id))
