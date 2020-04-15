@@ -67,16 +67,16 @@ def get_animal(animal_id):
 def update_animal_info(animal_id):
     request_center = get_jwt_identity()
     log_data = {'method_type': request.method, 'req_url': request.path,
-                'center_id': Center.get_center_by_name(request_center).id,
+                'center_id': request_center,
                 'entity_type': 'animal', 'entity_id': animal_id}
     file_logger.info('Animal replaced', extra=log_data)
     if Center.get_center(Animal.get_animal(animal_id).center_id).login != request_center:
         return Response('Forbidden', status=403)
     request_data = request.get_json()
     species = Species.get_species(request_data['species_id'])
-    if 'description' not in list(request_data.keys()):
+    if 'description' not in request_data:
         request_data['description'] = species.description
-    if 'price' not in list(request_data.keys()):
+    if 'price' not in request_data:
         request_data['price'] = species.price
     Animal.replace_animal(animal_id, **request_data)
     response = Response('', status=204, mimetype='application/json')
@@ -88,7 +88,7 @@ def update_animal_info(animal_id):
 def delete_animal(animal_id):
     request_center = get_jwt_identity()
     log_data = {'method_type': request.method, 'req_url': request.path,
-                'center_id': Center.get_center_by_name(request_center),
+                'center_id': request_center,
                 'entity_type': 'animal', 'entity_id': animal_id}
     file_logger.info('Animal deleted', extra=log_data)
     if Center.get_center(Animal.get_animal(animal_id).center_id).login != request_center:
@@ -137,7 +137,7 @@ def add_species():
     species_id = Species.add_species(**request_data)
     request_center = get_jwt_identity()
     log_data = {'method_type': request.method, 'req_url': request.path,
-                'center_id': Center.get_center_by_name(request_center).id,
+                'center_id': request_center,
                 'entity_type': 'species', 'entity_id': species_id}
     file_logger.info('Species added', extra=log_data)
     response = Response('', status=201, mimetype='application/json')

@@ -1,27 +1,9 @@
 import functools
-import jwt
 import json
 
-from flask import request, Response
-from flask import current_app as app
+from flask import Response
 from sqlalchemy.exc import StatementError
-
-
-def token_required(f):
-    """
-    Legacy function to support jwt
-    """
-
-    @functools.wraps(f)
-    def wrapper(*args, **kwargs):
-        token = request.args.get('token')
-        try:
-            jwt.decode(token, app.config['SECRET_KEY'])
-            return f(*args, **kwargs)
-        except:
-            return Response("{'error': 'Need a valid token to display this page'}", 401, mimetype='application/json')
-
-    return wrapper
+from app import file_logger
 
 
 def error_handler(f):
@@ -39,6 +21,7 @@ def error_handler(f):
             }
             response = Response(json.dumps(invalid_msg), status=400, mimetype='application/json')
         except Exception as e:
+            file_logger.exception('Exception occurred. See information below')
             invalid_msg = {
                 'error': str(e)
             }

@@ -87,3 +87,4 @@ class Animal(db.Model):
         animal_to_replace.species_id = species_id
         animal_to_replace.description = description
         animal_to_replace.price = price
+        db.session.commit()
